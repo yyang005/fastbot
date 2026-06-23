@@ -42,7 +42,7 @@ cd ~/ros2_ws/src
 # 3. Download the FastBot Repository
 
 ```bash
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/fastbot.git
+git clone https://github.com/yyang005/fastbot.git
 ```
 
 ---
@@ -55,17 +55,7 @@ Update package information:
 sudo apt update
 ```
 
-Install ROS dependencies:
-
-```bash
-cd ~/ros2_ws
-
-rosdep update
-
-rosdep install --from-paths src --ignore-src -r -y
-```
-
-Install additional packages required by FastBot:
+Install packages required by FastBot:
 
 ```bash
 sudo apt install \
@@ -91,27 +81,46 @@ After a successful build:
 source install/setup.bash
 ```
 
-Optionally add the workspace to your shell startup:
-
-```bash
-echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
-```
-
-Reload:
-
-```bash
-source ~/.bashrc
-```
-
 ---
 
 # 6. Launch FastBot
 
-Start all robot drivers:
+## Launch Parameters
+
+The FastBot bringup launch file accepts the following parameters:
+
+| Parameter    | Default Value     | Description                                                                             |
+| ------------ | ----------------- | --------------------------------------------------------------------------------------- |
+| use_sim_time | false             | Use simulation clock instead of system clock. Set to `true` when running in simulation. |
+| robot_name   | fastbot           | Robot namespace and frame prefix.                                                       |
+| serial_port  | /dev/arduino_nano | Serial port connected to the Arduino motor controller.                                  |
+| baud_rate    | 57600             | Baud rate used for communication with the motor controller.                             |
+| loop_rate    | 30                | Motor controller update rate (Hz).                                                      |
+| encoder_cpr  | 2550              | Encoder counts per wheel revolution.                                                    |
+
+### Default Launch
 
 ```bash
 ros2 launch fastbot_bringup bringup.launch.xml
 ```
+
+### Example with Custom Parameters
+
+```bash
+ros2 launch fastbot_bringup bringup.launch.xml \
+    robot_name:=fastbot01 \
+    serial_port:=/dev/ttyUSB0 \
+    baud_rate:=57600 \
+    loop_rate:=30 \
+    encoder_cpr:=2550
+```
+
+> **Important:** Make sure the parameter values match the hardware configuration of the robot being used. In particular, verify:
+>
+> * `serial_port` points to the correct Arduino device.
+> * `baud_rate` matches the Arduino firmware settings.
+> * `encoder_cpr` matches the wheel encoder installed on the robot.
+> * `robot_name` is unique if multiple robots are operating on the same network.
 
 This launch file starts:
 
@@ -202,68 +211,4 @@ Select:
 
 ```text
 /fastbot/image_raw
-```
-
----
-
-# Updating the Software
-
-To update FastBot to the latest version:
-
-```bash
-cd ~/ros2_ws/src/fastbot
-
-git pull
-```
-
-Rebuild:
-
-```bash
-cd ~/ros2_ws
-
-colcon build --symlink-install
-
-source install/setup.bash
-```
-
----
-
-# Troubleshooting
-
-## Build Error
-
-```text
-fatal error: pcap.h: No such file or directory
-```
-
-Install:
-
-```bash
-sudo apt install libpcap-dev
-```
-
----
-
-## Motor Driver Not Found
-
-Verify:
-
-```bash
-ls -l /dev/arduino_nano
-```
-
----
-
-## Launch Fails
-
-Make sure the workspace is sourced:
-
-```bash
-source ~/ros2_ws/install/setup.bash
-```
-
-Verify the package exists:
-
-```bash
-ros2 pkg list | grep fastbot
 ```
