@@ -60,7 +60,7 @@ Install packages required by FastBot:
 ```bash
 sudo apt install \
     ros-humble-v4l2-camera \
-    libpcap-dev
+    ros-humble-image-transport-plugins v4l-utils
 ```
 
 ---
